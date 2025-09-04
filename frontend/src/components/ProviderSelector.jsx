@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 const ProviderSelector = ({ 
   selectedProvider, 
   setSelectedProvider, 
@@ -50,6 +52,13 @@ const ProviderSelector = ({
       )}
     </div>
   );
+};
+
+ProviderSelector.propTypes = {
+  selectedProvider: PropTypes.string.isRequired,
+  setSelectedProvider: PropTypes.func.isRequired,
+  availableProviders: PropTypes.object.isRequired,
+  isDarkMode: PropTypes.bool.isRequired,
 };
 
 export default ProviderSelector;

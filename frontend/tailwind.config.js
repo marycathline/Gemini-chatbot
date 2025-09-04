@@ -4,9 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#10B981',
-        secondary: '#6EE7B7',
-        accent: '#ECFDF5',
+        primary: '#a21caf', // fuchsia-800
+        secondary: '#c026d3', // fuchsia-600 for a nice gradient
+        accent: '#F3E8FF', // light fuchsia background
         background: '#F9FAFB',
       },
     },

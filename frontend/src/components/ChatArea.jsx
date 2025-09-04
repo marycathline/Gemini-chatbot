@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import Message from './Message';
 
 const ChatArea = ({ messages, isLoading, isDarkMode, messagesEndRef }) => {
@@ -30,6 +31,21 @@ const ChatArea = ({ messages, isLoading, isDarkMode, messagesEndRef }) => {
       </div>
     </div>
   );
+};
+ChatArea.propTypes = {
+  messages: PropTypes.arrayOf(
+    PropTypes.shape({
+      role: PropTypes.string.isRequired,
+      content: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  isDarkMode: PropTypes.bool.isRequired,
+  messagesEndRef: PropTypes.oneOfType([
+    // Support for both callback refs and ref objects
+    PropTypes.func, 
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+  ]).isRequired,
 };
 
 export default ChatArea;

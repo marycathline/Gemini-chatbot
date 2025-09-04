@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 const ChatInput = ({ input, setInput, sendMessage, isLoading, isDarkMode }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -31,6 +33,14 @@ const ChatInput = ({ input, setInput, sendMessage, isLoading, isDarkMode }) => {
       </div>
     </form>
   );
+};
+
+ChatInput.propTypes = {
+  input: PropTypes.string.isRequired,
+  setInput: PropTypes.func.isRequired,
+  sendMessage: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  isDarkMode: PropTypes.bool.isRequired,
 };
 
 export default ChatInput;
