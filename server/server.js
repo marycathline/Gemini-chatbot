@@ -6,13 +6,24 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
-app.use(cors());
+// ✅ CORS: whitelist your deployed frontend + localhost
+const allowedOrigins = [
+  'https://gemini-chatbot-1-6zmb.onrender.com', // Render frontend
+  'http://localhost:5173'                       // local Vite dev server
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+
 app.use(express.json({ limit: '10mb' }));
 
 if (isDevelopment()) {
   console.log('Development mode: detailed logging enabled');
 }
 
+// Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
@@ -22,11 +33,14 @@ app.get('/health', (req, res) => {
   });
 });
 
+// API routes
 app.use('/api', chatRoutes);
 
+// Error handlers
 app.use(notFoundHandler);
 app.use(errorHandler);
 
+// Server bootstrap
 const startServer = async () => {
   try {
     validateConfig();
