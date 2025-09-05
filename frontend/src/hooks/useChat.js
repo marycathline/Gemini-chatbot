@@ -10,20 +10,6 @@ const useChat = () => {
   const [selectedProvider, setSelectedProvider] = useState('gemini');
   const [availableProviders, setAvailableProviders] = useState({});
 
-  // Updated topic suggestions - you can customize these
-  const topicSuggestions = [
-    'Write a sonnet about programming',
-    'Explain quantum computing',
-    'Tell me about AI development',
-  ];
-
-  const handleSuggestionClick = (suggestion) => {
-    setInput(suggestion);
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -35,7 +21,8 @@ const useChat = () => {
   useEffect(() => {
     const fetchProviders = async () => {
       try {
-        const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+        const baseURL =
+          import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
         const response = await axios.get(`${baseURL}/api/providers`);
         if (response.data.success) {
           setAvailableProviders(response.data.providers);
@@ -47,19 +34,24 @@ const useChat = () => {
         console.error('Failed to fetch providers:', error);
       }
     };
-    
+
     fetchProviders();
   }, []);
 
   const sendMessage = async (message) => {
     if (!message.trim()) return;
 
-    setMessages((prev) => [...prev, { role: 'user', content: message }]);
+    //timestamp for user
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: message, timestamp: new Date().toISOString() },
+    ]);
     setInput('');
     setIsLoading(true);
 
     try {
-      const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+      const baseURL =
+        import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
       const response = await axios.post(
         `${baseURL}/api/chat`,
         {
@@ -74,11 +66,14 @@ const useChat = () => {
       if (response.data.success) {
         setMessages((prev) => [
           ...prev,
-          { 
-            role: 'assistant', 
+          {
+            role: 'assistant',
             content: response.data.message,
             provider: response.data.provider,
-            model: response.data.model
+            model: response.data.model,
+            // Assistant timestamp
+            timestamp:
+              response.data.timestamp || new Date().toISOString(),
           },
         ]);
       } else {
@@ -87,26 +82,32 @@ const useChat = () => {
     } catch (error) {
       console.error('Error:', error);
       let errorMessage = 'Sorry, I encountered an error. Please try again.';
-      
+
       if (error.response?.data?.message) {
         errorMessage = `Error: ${error.response.data.message}`;
       } else if (error.message.includes('Network Error')) {
-        const isDevelopment = import.meta.env.MODE === 'development' || 
-                              (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.includes('localhost'));
-        
+        const isDevelopment =
+          import.meta.env.MODE === 'development' ||
+          (import.meta.env.VITE_API_BASE_URL &&
+            import.meta.env.VITE_API_BASE_URL.includes('localhost'));
+
         if (isDevelopment) {
-          const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+          const baseURL =
+            import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
           errorMessage = `Cannot connect to server. Make sure the server is running on ${baseURL}`;
         } else {
-          errorMessage = 'Unable to connect to the chat service. Please check your internet connection and try again.';
+          errorMessage =
+            'Unable to connect to the chat service. Please check your internet connection and try again.';
         }
       }
-      
+
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
           content: errorMessage,
+          //  Error assistant messages timestamp
+          timestamp: new Date().toISOString(),
         },
       ]);
     } finally {
@@ -120,13 +121,12 @@ const useChat = () => {
 
   return {
     messages,
+    setMessages,
     input,
     setInput,
     isLoading,
     sendMessage,
     messagesEndRef,
-    topicSuggestions,
-    handleSuggestionClick,
     isDarkMode,
     toggleDarkMode,
     selectedProvider,

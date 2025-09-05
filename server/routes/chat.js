@@ -36,11 +36,11 @@ router.post('/chat', validateChatRequest, asyncHandler(async (req, res) => {
   }
 
   const response = await aiService.generateResponse(selectedProvider, message, options);
-  
+  // Ensure timestamp is included in the response
   res.json({
     success: true,
     ...response,
-    timestamp: new Date().toISOString()
+    timestamp: response.timestamp || new Date().toISOString()
   });
 }));
 

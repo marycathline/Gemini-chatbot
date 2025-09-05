@@ -1,7 +1,19 @@
 import PropTypes from 'prop-types';
-import Message from './Message';
+import MessageBubble from './MessageBubble';
+import TypingIndicator from './TypingIndicator';
+import CardResponse from './CardResponse';
 
-const ChatArea = ({ messages, isLoading, isDarkMode, messagesEndRef }) => {
+// Format timestamp nicely with timezone (e.g., 02:33 PM EAT)
+const formatTimestamp = (dateString) => {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short', // adds local timezone abbreviation
+  }).format(date);
+};
+
+const ChatArea = ({ messages, isLoading, isDarkMode, messagesEndRef, onEditMessage }) => {
   return (
     <div className="flex-grow flex flex-col">
       <div
@@ -9,43 +21,78 @@ const ChatArea = ({ messages, isLoading, isDarkMode, messagesEndRef }) => {
           isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
         }`}
       >
-        {messages.map((message, index) => (
-          <Message
-            key={index}
-            role={message.role}
-            content={message.content}
-          />
-        ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div
-              className={`rounded-2xl p-3 sm:p-4 ${
-                isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
-              }`}
-            >
-              <p className="text-sm">Thinking...</p>
-            </div>
+        {/* Empty chat placeholder */}
+        {messages.length === 0 && !isLoading && (
+          <div className="text-gray-500 text-center mt-10">
+            Start a new chat to begin...
           </div>
         )}
+
+        {/* Loop messages */}
+        {messages.map((message, index) => {
+          // Detect card-style assistant responses
+          let isCard = false;
+          let cardProps = null;
+          if (message.role === 'assistant' && typeof message.content === 'string') {
+            try {
+              const json = JSON.parse(message.content);
+              if (json.type === 'card') {
+                isCard = true;
+                cardProps = {
+                  title: json.title,
+                  description: json.description,
+                  buttons: json.buttons,
+                  isDarkMode,
+                };
+              }
+            } catch {
+              // Not JSON, fallback to plain text
+            }
+          }
+
+          return (
+            <MessageBubble
+              key={index}
+              role={message.role}
+              content={isCard ? <CardResponse {...cardProps} /> : message.content}
+              timestamp={message.timestamp ? formatTimestamp(message.timestamp) : null}
+              isDarkMode={isDarkMode}
+              onEdit={() => onEditMessage && onEditMessage(message)}
+              onCopy={() => {
+                const textToCopy = isCard
+                  ? JSON.stringify(cardProps, null, 2)
+                  : message.content;
+                navigator.clipboard.writeText(textToCopy);
+                // Tooltip handled in MessageBubble
+              }}
+            />
+          );
+        })}
+
+        {/* Show typing dots when loading */}
+        {isLoading && <TypingIndicator isDarkMode={isDarkMode} />}
+
         <div ref={messagesEndRef} />
       </div>
     </div>
   );
 };
+
 ChatArea.propTypes = {
   messages: PropTypes.arrayOf(
     PropTypes.shape({
       role: PropTypes.string.isRequired,
-      content: PropTypes.string.isRequired,
+      content: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
+      timestamp: PropTypes.string,
     })
   ).isRequired,
   isLoading: PropTypes.bool.isRequired,
   isDarkMode: PropTypes.bool.isRequired,
   messagesEndRef: PropTypes.oneOfType([
-    // Support for both callback refs and ref objects
-    PropTypes.func, 
-    PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
   ]).isRequired,
+  onEditMessage: PropTypes.func,
 };
 
 export default ChatArea;

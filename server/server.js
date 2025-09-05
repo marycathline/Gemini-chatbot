@@ -6,7 +6,7 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
-// ✅ CORS: whitelist your deployed frontend + localhost
+//CORS: whitelist your deployed frontend + localhost
 const allowedOrigins = [
   'https://gemini-chatbot-1-6zmb.onrender.com', // Render frontend
   'http://localhost:5173'                       // local Vite dev server
