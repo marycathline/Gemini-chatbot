@@ -1,94 +1,114 @@
-# Chat Application
+Gemini Chatbot
 
-## Overview
+Live demo: gemini-chatbot-1-6zmb.onrender.com
 
-This project is a real-time chat application that allows users to join chat rooms and communicate based on their assigned roles (User, Agent, Supervisor). The application leverages modern web technologies such as React, Socket.io, and Tailwind CSS to provide an engaging user experience.
+A modern web-based chatbot interface that integrates with multiple AI providers (like Gemini and  Azure,). Built with a React frontend and a secure Node.js backend deployed on Render.
 
-## Collaborators
+Features
 
-- [LoadSmile](https://github.com/loadsmile)
+Multi-provider support: Dynamically select from available AI providers.
 
-## Features
+Real-time chat UI: Smooth, responsive chatbot interface with scroll handling, dark mode, and topic suggestions.
 
-- **Role-Based Access**: Users can join as either a User, Agent, or Supervisor. Each role has specific functionalities and access.
-- **Real-Time Messaging**: Utilizes Socket.io for real-time communication between users in the same chat room.
-- **Private Messaging**: Agents and Supervisors can send private messages to each other.
-- **Multi-Language Support**: Users can select their preferred language from a dropdown menu.
-- **Responsive Design**: Built with Tailwind CSS for a clean and responsive UI.
+Built for deployment: Modular frontend and backend, ready for production deployment on Render.
 
-![screenshot](https://github.com/limatainer/ChatRoomAzureAI/blob/main/translate.gif)
+Healthy and monitored: Backend includes a /health endpoint for uptime checks.
 
-## Components
+Tech Stack
 
-1. **LoginForm**:
+Frontend: React (Vite), Tailwind CSS
 
-   - Allows users to enter their conversation code, username, language, and role.
-   - Validates input and manages state for agent and supervisor codes.
+Backend: Node.js 
 
-2. **Chat**:
+Hosting: Render (separate services for frontend and backend)
 
-   - Displays chat messages with timestamps and user roles.
-   - Supports sending messages and toggling private messaging options.
-   - Renders a sidebar for conversations and a knowledge base for agents and supervisors.
+Environment-aware config: VITE_API_BASE_URL and runtime fallback for ease of local development and production
 
-3. **App**:
-   - Manages the overall application state including room details, user information, and message history.
-   - Handles socket connections for real-time messaging.
+Quick Start
+Prerequisites
 
-## Installation
+Node.js (≥ 18)
 
-To get started with the project:
+npm 
 
-1. Clone the repository:
+An Azure or Gemini API key and deployment backend
 
-   ```bash
-   git clone <https://github.com/limatainer/ChatRoomAzureAI>
-   cd <frontweb>
-   cd <server>
-   ```
+Clone the repo
+git clone https://github.com/marycathline/Gemini-chatbot.git
+cd Gemini-chatbot
 
-2. Install dependencies:
+Backend Setup
+cd backend
+cp .env.example .env  # Add your API keys and config
 
-   ```bash
-   for server npm install
-   for frontweb yarn
-   ```
 
-3. Set up the environment variable for the socket server URL in a `.env` file:
+Backend .env (example):
 
-   ```plaintext
-   VITE_SOCKET_SERVER_URL=http://localhost:3000
-   ```
+GEMINI_OPENAI_ENDPOINT=...
+GEMINI_OPENAI_API_KEY=...
+DEPLOYMENT_NAME=...
+PORT=3000
+or AZURE_OPENAI
+# Optional: set CORS origins if customizing
 
-4. Start the development server and frontend:
 
-   ```bash
-   npm start and yarn dev
-   ```
+Run locally:
 
-5. Open your browser and navigate to `http://localhost:3000`.
+npm install
+npm run dev
 
-## Usage
 
-1. Enter a conversation code, your name, select a language, and choose your role (User, Agent, Supervisor).
-2. Click "Join Conversation" to enter the chat room.
-3. Send messages in the chat area; Agents and Supervisors can toggle private messaging.
+Endpoints:
 
-## Technologies Used
+GET /health → service health status
 
-- **React**: For building the user interface.
-- **Socket.io**: For real-time communication.
-- **Tailwind CSS**: For styling components.
-- **JavaScript/TypeScript**: For application logic.
+GET /api/providers → available AI providers
 
-## Contributing
+POST /api/chat → send chat messages
 
-Contributions are welcome! Please open an issue or submit a pull request for any enhancements or bug fixes.
+Frontend Setup
+cd frontend
+cp .env.example .env  # Provide VITE_API_BASE_URL here
 
-## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Frontend .env (local example):
 
----
+VITE_API_BASE_URL=http://localhost:3000
+VITE_API_TIMEOUT=30000
 
-Feel free to customize this README further based on specific project requirements or additional features!
+
+Run locally:
+
+npm install
+npm run dev
+
+Deploy on Render
+
+Backend service:
+
+Set health check path to /health
+
+No need to expose the root / unless desired
+
+Frontend service:
+
+Add environment variable:
+
+VITE_API_BASE_URL=https://<your-backend-service>.onrender.com
+
+
+Deploy and confirm Fetch / WebSocket calls route correctly to your backend.
+
+Testing the Integration
+
+Visit the deployed frontend.
+
+Open browser DevTools → Network tab.
+
+Send a message—observe requests going to:
+
+https://<your-backend-service>/api/chat
+
+
+Backend must return JSON with success, message, and provider/model info.
+
