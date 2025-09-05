@@ -1,6 +1,6 @@
 Gemini Chatbot
 
-Live demo: gemini-chatbot-1-6zmb.onrender.com
+Live demo: https://gemini-chatbot-1-6zmb.onrender.com/
 
 A modern web-based chatbot interface that integrates with multiple AI providers (like Gemini and  Azure,). Built with a React frontend and a secure Node.js backend deployed on Render.
 
