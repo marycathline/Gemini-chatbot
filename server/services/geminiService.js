@@ -1,3 +1,4 @@
+// services/GeminiService.js
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { config } = require('../config/config');
 
@@ -7,7 +8,7 @@ class GeminiService {
     this.model = config.gemini.model;
     this.maxTokens = config.gemini.maxTokens;
     this.temperature = config.gemini.temperature;
-    
+
     if (this.isConfigured()) {
       this.genAI = new GoogleGenerativeAI(this.apiKey);
     }
@@ -25,7 +26,6 @@ class GeminiService {
     const {
       maxTokens = this.maxTokens,
       temperature = this.temperature,
-      formatResponse = true
     } = options;
 
     try {
@@ -37,13 +37,15 @@ class GeminiService {
         },
       });
 
-      let prompt = message;
-      if (formatResponse) {
-        prompt = `${message}\n\nPlease format your response using these markers:
-- Use **Heading:** for section headings
-- Use * for bullet points
-- Use numbers followed by periods for numbered lists`;
-      }
+      // Clean, conversational prompt
+      const prompt = `
+      You are a helpful and friendly assistant. 
+      Always reply in clear, natural sentences like a normal conversation. 
+      Do not use special formatting (headings, bullets, lists, or separators) 
+      unless the user specifically asks for it.
+
+      User: ${message}
+      `;
 
       const result = await model.generateContent(prompt);
       const response = await result.response;
@@ -56,8 +58,8 @@ class GeminiService {
         usage: {
           promptTokens: result.response.usageMetadata?.promptTokenCount || 0,
           completionTokens: result.response.usageMetadata?.candidatesTokenCount || 0,
-          totalTokens: result.response.usageMetadata?.totalTokenCount || 0
-        }
+          totalTokens: result.response.usageMetadata?.totalTokenCount || 0,
+        },
       };
     } catch (error) {
       throw new Error(`Google Gemini API error: ${error.message}`);
